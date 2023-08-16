@@ -1,4 +1,7 @@
 import { randomBytes } from "crypto";
+import debugModule from "debug";
+
+const debug = debugModule("socket.io-redis");
 
 export function hasBinary(obj: any, toJSON?: boolean): boolean {
   if (!obj || typeof obj !== "object") {
@@ -78,9 +81,14 @@ export function SSUBSCRIBE(
 
 export function SUNSUBSCRIBE(redisClient: any, channel: string | string[]) {
   if (isRedisV4Client(redisClient)) {
-    redisClient.sUnsubscribe(channel);
+    // sUnsubscribe throws error to gobal.
+    redisClient.sUnsubscribe(channel).catch((err) => {
+      debug("SUNSUBSCRIBE error", err);
+    });
   } else {
-    redisClient.sunsubscribe(channel);
+    redisClient.sunsubscribe(channel).catch((err) => {
+      debug("SUNSUBSCRIBE error", err);
+    });
   }
 }
 
@@ -133,4 +141,11 @@ export function PUBSUB(redisClient: any, arg: string, channel: string) {
       });
     });
   }
+}
+
+export function SHARDED_PUBSUB(redisClient: any, arg: string, channel: string) {
+  // Use the sharded PUBSUB command. It could find the correct slot using the channel.
+  return redisClient
+    .sendCommand(["PUBSUB", arg, channel])
+    .then(parseNumSubResponse);
 }

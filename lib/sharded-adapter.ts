@@ -1,6 +1,6 @@
 import { ClusterAdapter, ClusterMessage, MessageType } from "./cluster-adapter";
 import { decode, encode } from "notepack.io";
-import { hasBinary, PUBSUB, SPUBLISH, SSUBSCRIBE, SUNSUBSCRIBE } from "./util";
+import { hasBinary, SHARDED_PUBSUB, SPUBLISH, SSUBSCRIBE, SUNSUBSCRIBE } from "./util";
 import debugModule from "debug";
 
 const debug = debugModule("socket.io-redis");
@@ -52,7 +52,7 @@ export function createShardedAdapter(
   };
 }
 
-class ShardedRedisAdapter extends ClusterAdapter {
+export class ShardedRedisAdapter extends ClusterAdapter {
   private readonly pubClient: any;
   private readonly subClient: any;
   private readonly opts: Required<ShardedRedisAdapterOptions>;
@@ -186,6 +186,6 @@ class ShardedRedisAdapter extends ClusterAdapter {
   }
 
   override serverCount(): Promise<number> {
-    return PUBSUB(this.pubClient, "SHARDNUMSUB", this.channel);
+    return SHARDED_PUBSUB(this.pubClient, "SHARDNUMSUB", this.channel);
   }
 }
