@@ -143,9 +143,13 @@ export function PUBSUB(redisClient: any, arg: string, channel: string) {
   }
 }
 
-export function SHARDED_PUBSUB(redisClient: any, arg: string, channel: string) {
+export function SHARDED_PUBSUB(
+  redisClient: any,
+  arg: string,
+  channel: string
+): Promise<number> {
   // Use the sharded PUBSUB command. It could find the correct slot using the channel.
   return redisClient
-    .sendCommand(["PUBSUB", arg, channel])
+    .sendCommand(channel, false, ["PUBSUB", arg, channel])
     .then(parseNumSubResponse);
 }
